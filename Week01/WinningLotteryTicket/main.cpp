@@ -61,16 +61,16 @@ long winningLotteryTicket(vector<string> tickets) {
 
     for (int first = 0; first < MAX_MASKS; first++) {
         if (maskCount[first] == 0) { continue; }
-        if ((first | first) == ALL_DIGITS) { // Tickets with full
+        if ((first | first) == ALL_DIGITS) { // Same value
             long count = maskCount[first];
-            winning += count * (count - 1) / 2;
+            winning += count * (count - 1) / 2; // Removing self pairs
         }
 
-        for (int second = first + 1; second < MAX_MASKS; second++) {
+        for (int second = first + 1; second < MAX_MASKS; second++) { // Checking if other masks complete
             if (maskCount[second] == 0) { continue; }
 
             if ((first | second) == ALL_DIGITS) {
-                winning += maskCount[first] * maskCount[second];
+                winning += maskCount[first] * maskCount[second]; // Any of first can pair with second
             }
         }
     }
