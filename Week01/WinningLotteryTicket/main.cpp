@@ -44,7 +44,7 @@ bool isWinningTicket(std::string& ticket, std::string& other) {
 long winningLotteryTicket(vector<string> tickets) {
     constexpr int ALL_DIGITS = (1 << 10) - 1;
     constexpr int MAX_MASKS = 1 << 10;
-    long maskCount[1 << 10] = {0}; // All possible numbers in range [1,10^6]
+    long maskCount[MAX_MASKS] = {0}; // All possible numbers in range [1,10^6]
     // Mask is used as index into array
 
     for (const string& ticket : tickets) {
