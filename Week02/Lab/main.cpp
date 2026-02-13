@@ -61,7 +61,7 @@ public:
     }
 
     void sortColours(std::vector<int>& nums) {
-        std::unordered_map<int, int> mapped;
+        std::unordered_map<int, size_t> mapped;
 
         for (int num : nums) {
             mapped[num]++;
@@ -69,7 +69,7 @@ public:
 
         int offset = 0;
         for (int i = 0; i <= 2; i++) {
-            memset(nums.data() + offset, i, nums[i]);
+            memset(nums.data() + offset * sizeof(int), i, mapped[i]);
             offset += nums[i];
         }
     }
@@ -77,9 +77,8 @@ public:
 
 int main(void) {
     std::vector<std::vector<int>> tests = {
-        { "11", "1" },
-        { "1010", "1011" },
-        { "0", "0" }
+        { 2, 1, 2, 0, 0, 0, 1 },
+        { 1, 0, 1, 2, 1, 0, 2 },
     };
 
     Solution solution;
