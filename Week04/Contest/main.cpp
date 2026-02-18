@@ -305,14 +305,14 @@ std::string playfair_code(std::string plainText, std::string codePhrase) {
     }
 
     std::vector<std::pair<char, char>> pairs;
-    for (size_t i = 0; i < plainText.size() - 1; ) {
+    for (size_t i = 0; i < plainText.size(); ) {
         if (plainText[i] == 'J') { 
             plainText[i] = 'I'; 
         }
-        if (plainText[i + 1] == 'J') {
+        if (i < plainText.size() - 1 && plainText[i + 1] == 'J') {
             plainText[i + 1] = 'I';
         }
-        if (plainText[i] == plainText[i + 1]) {
+        if (i < plainText.size() - 1 && plainText[i] == plainText[i + 1]) {
             pairs.push_back(std::make_pair(plainText[i], 'X'));
             i++;
         } else {
