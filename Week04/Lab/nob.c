@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
     nob_cmd_append(&cmd, "-o");
     nob_cmd_append(&cmd, exe);
     nob_cmd_append(&cmd, "main.cpp");
-    nob_da_foreach(const char*, cmd, &flags);
+    nob_da_foreach(const char*, flag, &flags) nob_cmd_append(&cmd, *flag);
 
     bool ok = nob_cmd_run_sync_and_reset(&cmd);
 

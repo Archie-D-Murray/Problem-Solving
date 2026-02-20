@@ -182,17 +182,17 @@ void test_grid_search() {
 }
 
 struct ivec2 {
-    int x = 0;
-    int y = 0;
+    int x;
+    int y;
 };
 
-bool ivec2_elements_equal(const ivec2& vec) {
-    return abs(vec.x - vec.y) == 0;
+bool ivec2_elements_equal(const ivec2& vec) {    
+    return abs(vec.x) - abs(vec.y) == 0;
 }
 
 int ivec2_dist(const ivec2& vec) {
     if (ivec2_elements_equal(vec)) {
-        return vec.x;
+        return abs(vec.x);
     } else {
         if (abs(vec.x) > abs(vec.y)) {
             return abs(vec.x);
@@ -206,18 +206,18 @@ enum dir_t { up, down, left, right, up_left, up_right, down_left, down_right, co
 
 dir_t get_dir(ivec2 diff) {
     if (diff.x == 0) {
-        return diff.y < 0 ? up : down;
+        return diff.y < 0 ? dir_t::up : dir_t::down;
     } else if (diff.y == 0) {
-        return diff.x < 0 ? left : right;
+        return diff.x < 0 ? dir_t::left : dir_t::right;
     } else if (ivec2_elements_equal(diff)) {
         if (diff.y > 0) {
-            return diff.x < 0 ? down_left : down_right;
+            return diff.x < 0 ? dir_t::down_left : dir_t::down_right;
         } else {
-            return diff.x < 0 ? up_left : up_right;
+            return diff.x < 0 ? dir_t::up_left : dir_t::up_right;
         }
     }
 
-    return count;
+    return dir_t::count;
 }
 
 std::unordered_map<dir_t, std::string> dir_to_name = {
@@ -235,19 +235,16 @@ std::unordered_map<dir_t, std::string> dir_to_name = {
 int queen_attacks(int n, int k, int r_q, int c_q, std::vector<std::vector<int>> obstacles) {
     int moves[dir_t::count] = {0};
 
-    ivec2 queen = { r_q, c_q };
-    moves[down]       = std::max(0, n - queen.y);
-    moves[up]         = queen.y - 1;
-    moves[left]       = queen.x - 1;
-    moves[right]      = std::max(0, n - queen.x);
-    moves[up_left]    = std::min(moves[up], moves[left]);
-    moves[up_right]   = std::min(moves[up], moves[right]);
-    moves[down_left]  = std::min(moves[down], moves[left]);
-    moves[down_right] = std::min(moves[down], moves[right]);
+    ivec2 queen = ivec2 { r_q, c_q };
 
-    for (size_t i = 0; i < count; i++) {
-        std::cout << "Grid: " << n << " Queen: [ " << queen.x << ", " << queen.y << " ]: (" << dir_to_name[(dir_t)i] << ") -> " << moves[i] << "\n";
-    }
+    moves[dir_t::up]         = queen.y - 1;
+    moves[dir_t::down]       = std::max(0, n - queen.y);
+    moves[dir_t::left]       = queen.x - 1;
+    moves[dir_t::right]      = std::max(0, n - queen.x);
+    moves[dir_t::up_left]    = std::min(moves[dir_t::up], moves[dir_t::left]);
+    moves[dir_t::up_right]   = std::min(moves[dir_t::up], moves[dir_t::right]);
+    moves[dir_t::down_left]  = std::min(moves[dir_t::down], moves[dir_t::left]);
+    moves[dir_t::down_right] = std::min(moves[dir_t::down], moves[dir_t::right]);
 
     std::unordered_set<long> processed;
 
@@ -261,9 +258,7 @@ int queen_attacks(int n, int k, int r_q, int c_q, std::vector<std::vector<int>> 
         ivec2 diff = { obstacle.x - queen.x, obstacle.y - queen.y };
         dir_t dir = get_dir(diff);
 
-        std::cout << "Got diff: [ " << diff.x << ", " << diff.y << " ] (" << dir_to_name[dir] << ") dist: " << ivec2_dist(diff) << "\n";
-
-        if (dir == count) { continue; }
+        if (dir == dir_t::count) { continue; }
         moves[dir] = std::min(moves[dir], ivec2_dist(diff) - 1);
     }
 
@@ -271,8 +266,7 @@ int queen_attacks(int n, int k, int r_q, int c_q, std::vector<std::vector<int>> 
     for (size_t i = 0; i < dir_t::count; i++) {
         sum += moves[i];
     }
-    return sum;
-}
+    return sum;}
 
 struct queen_attacks_test_t {
     std::pair<int, int> pos;
@@ -294,8 +288,8 @@ void test_queen_attacks() {
             .grid_size = 5,
             .obstacles = {
                 {5,5},
-                {4,2},
-                {2,3}
+                {2,4},
+                {3,2}
             },
             .expected = 10
         },
@@ -307,11 +301,16 @@ void test_queen_attacks() {
         }
     };
 
+    size_t i = 0;
     for (queen_attacks_test_t& test : tests) {
+        std::cout << "\nTest: " << i << "\n";
+        std::cout << "----------------------------------------\n";
         int output = queen_attacks(test.grid_size, test.obstacles.size(), test.pos.first, test.pos.second, test.obstacles);
         std::cout << "Output:   " << output << "\n";
         std::cout << "Expected: " << test.expected << "\n";
         std::cout << "Match:    " << (output == test.expected ? "TRUE" : "FALSE") << "\n";
+        std::cout << "----------------------------------------\n";
+        i++;
     }
 }
 
