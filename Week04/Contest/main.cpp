@@ -145,11 +145,40 @@ void test_morse_equivalent() {
     }
 }
 
+void up(size_t* index, size_t width) {
+    (*index) -= width;
+}
+
+void down(size_t* index, size_t width) {
+    (*index) += width;
+}
+
+void right(size_t* index, size_t width) {
+    (*index) += 1;
+}
+
+void left(size_t* index, size_t width) {
+    (*index) -= 1;
+}
+
+typedef void (*move_t(size_t*, size_t));
+
+
+// Leaving blank and initialising using emplace or just moves['^'] = &up; does not work either
+std::unordered_map<char, move_t> moves = {
+    { '^', &up },
+    { 'v', &down },
+    { '>', &right },
+    { '<', &left },
+}
+
 int32_t grid_index(int32_t nArray, int32_t nSteps, std::vector<std::string>& grid) {
     size_t index = 0;
     std::unordered_map<size_t, size_t> loops;
 
     for (size_t i = 0; i < nSteps; i++) {
+
+        // This if statement massively optimises but is not necessary for C++
         if (!loops.count(index)) {
             loops[index] = i;
         } else {
@@ -157,6 +186,13 @@ int32_t grid_index(int32_t nArray, int32_t nSteps, std::vector<std::string>& gri
             loops.clear();
             i = 0;
         }
+
+        #ifndef FUNCTION_PTR_LOOKUP
+
+        moves[grid[index / nArray][index % nArray]](&index, nArray);
+        
+        #else
+
         char ch = grid[index / nArray][index % nArray];
         switch (ch) {
             case '>':
@@ -175,6 +211,8 @@ int32_t grid_index(int32_t nArray, int32_t nSteps, std::vector<std::string>& gri
                 index += nArray;
             break;
         }
+
+         #endif
     }
 
     return index;
@@ -289,6 +327,7 @@ std::string playfair_code(std::string plainText, std::string codePhrase) {
         }
     }
 
+    std::cout << "Conversion grid:\n";
     for (size_t y = 0; y < 5; y++) {
         for (size_t x = 0; x < 5; x++) {
             std::cout << grid[to_index_coords(x, y, 5)];
@@ -304,6 +343,7 @@ std::string playfair_code(std::string plainText, std::string codePhrase) {
         rows[grid[i]] = i / 5;
     }
 
+    std::cout << "\nPairs:\n";
     std::vector<std::pair<char, char>> pairs;
     for (size_t i = 0; i < plainText.size() - 1; ) {
         if (plainText[i] == 'J') { 
@@ -330,14 +370,14 @@ std::string playfair_code(std::string plainText, std::string codePhrase) {
         std::cout << "Got pair: " << pair.first << pair.second << " -> ";
 
         if (correct_rect(pair, cols, rows, grid)) {
-            std::cout << pair.first << pair.second << "\n";
-            std::cout << "Corrected rect\n";
+            std::cout << pair.first << pair.second;
+            std::cout << " (Corrected rect)\n";
         } else if (correct_rows(pair, cols, rows, grid)) {
-            std::cout << pair.first << pair.second << "\n";
-            std::cout << "Corrected row\n";
+            std::cout << pair.first << pair.second;
+            std::cout << " (Corrected rows)\n";
         } else if (correct_cols(pair, cols, rows, grid)) {
-            std::cout << pair.first << pair.second << "\n";
-            std::cout << "Corrected cols\n";
+            std::cout << pair.first << pair.second;
+            std::cout << " (Corrected cols)\n";
         } else {
             std::cout << pair.first << pair.second << "\n";
         }
@@ -353,8 +393,45 @@ std::string playfair_code(std::string plainText, std::string codePhrase) {
     return encoded;
 }
 
+struct code_test_t {
+    std::string plain_text; 
+    std::string code_phrase; 
+    std::string expected; 
+};
+
 void test_playfair_code() {
-    std::cout << playfair_code("WECANNOTTALKABOUTMOTLEYCRUEINTOOMUCHDETAIL", "NIKKYSIX") << "\n";
+    std::vector<code_test_t> tests = {
+        {
+            "HIDETHEGOLDINTHETREESTUMP",
+            "PLAYFAIREXAMPLE",
+            "BMODZBXDNABEKUDMUIXMMOUVIF"
+        },
+        {
+            "IAMNOANUMBERIAMAFREEMAN",
+            "HELLOWORLD",
+            "QIFTLBUHKCHDQIICNFLVWGRQ"
+        },
+        {
+            "THELETTERJHASTOBEREPLACEDINAPLAYFAIRCODE",
+            "WORDWITHAJ",
+            "HAFEMEEMDWABMCDHGWGMGCTLIWPHSGBXGHWDHIWK"
+        },
+        {
+            "WECANNOTTALKABOUTMOTLEYCRUEINTOOMUCHDETAIL",
+            "NIKKYSIX",
+            "THDBXEIMNEUXGSBCUINTMUEFCHOZFNXNMAPOWALCMNFAED",  // I seem to keep missing the ED on the end...
+        },
+    };
+
+    for (code_test_t& test : tests) {
+        std::cout << "Plain Text: " << test.plain_text << "\n";
+        std::cout << "Code Phrase: " << test.code_phrase << "\n";
+        std::string output = playfair_code(test.plain_text, test.code_phrase);
+        std::cout << "Output:   " << output << "\n";
+        std::cout << "Expected: " << test.expected << "\n";
+
+        std::cout << "Match: " << ((output == test.expected) ? "True\n" : "False\n");
+    }
 }
 
 int main(void) {
