@@ -1,9 +1,11 @@
+#include <algorithm>
 #include <cctype>
 #include <iostream>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <xutility>
 
 template<typename T> void print_vector(std::vector<T> vector, bool new_line = true) {
     std::cout << "[ ";
@@ -115,9 +117,8 @@ void test_isomorphic() {
 bool find_first_line(std::string& line, std::string& pattern, size_t* out) {
     size_t pos = line.find(pattern[0]);
     size_t end = line.npos;
-    while (pos != end && line.size() - pattern.size() >= pos) {
-        pos = line.find(pattern, pos);
-        if (pos != end) {
+    while (pos != end && line.size() - pattern.size() > pos) {
+        if (line.substr(pos, pattern.size()) == pattern) {
             *out = pos;
             return true;
         } else {
@@ -133,12 +134,11 @@ std::string grid_search(std::vector<std::string>& G, std::vector<std::string>& P
         if (!find_first_line(G[start], P[0], &pos)) { continue; }
         for (size_t i = 1; i < P.size(); i++) {
             std::string& line = G[start + i];
-            size_t p_pos = line.find(P[i][0], pos);
-            if (p_pos != pos) { break;}
-            if (!line.find(P[i], p_pos)) { 
+            if (line.substr(pos, P[i].size()) != P[i]) {
                 break;
             }
-            if (i == P.size() - 1) {
+
+            if (i + 1 == P.size()) {
                 return "YES";
             }
         }
@@ -181,8 +181,97 @@ void test_grid_search() {
     std::cout << "Match:    " << (output == test.expected ? "TRUE" : "FALSE") << "\n";
 }
 
+struct ivec2 {
+    int x = 0;
+    int y = 0;
+};
+
+bool ivec2_elements_equal(const ivec2& vec) {
+    return abs(vec.x - vec.y) == 0;
+}
+
+int ivec2_dist(const ivec2& vec) {
+    if (ivec2_elements_equal(vec)) {
+        return vec.x;
+    } else {
+        if (abs(vec.x) > abs(vec.y)) {
+            return abs(vec.x);
+        } else {
+            return abs(vec.y);
+        }
+    }
+}
+
+enum dir_t { up, down, left, right, up_left, up_right, down_left, down_right, count };
+
+dir_t get_dir(ivec2 diff) {
+    if (diff.x == 0) {
+        return diff.y < 0 ? up : down;
+    } else if (diff.y == 0) {
+        return diff.x < 0 ? left : right;
+    } else if (ivec2_elements_equal(diff)) {
+        if (diff.y > 0) {
+            return diff.x < 0 ? down_left : down_right;
+        } else {
+            return diff.x < 0 ? up_left : up_right;
+        }
+    }
+
+    return count;
+}
+
+std::unordered_map<dir_t, std::string> dir_to_name = {
+    {up, "UP"},        
+    {down, "DOWN"},      
+    {left, "LEFT"},      
+    {right, "RIGHT"},     
+    {up_left, "UP_LEFT"},   
+    {up_right, "UP_RIGHT"},  
+    {down_left, "DOWN_LEFT"}, 
+    {down_right, "DOWN_RIGHT"},
+    {count, "NONE"}
+};
+
 int queen_attacks(int n, int k, int r_q, int c_q, std::vector<std::vector<int>> obstacles) {
-    return 0;
+    int moves[dir_t::count] = {0};
+
+    ivec2 queen = { r_q, c_q };
+    moves[down]       = std::max(0, n - queen.y);
+    moves[up]         = queen.y - 1;
+    moves[left]       = queen.x - 1;
+    moves[right]      = std::max(0, n - queen.x);
+    moves[up_left]    = std::min(moves[up], moves[left]);
+    moves[up_right]   = std::min(moves[up], moves[right]);
+    moves[down_left]  = std::min(moves[down], moves[left]);
+    moves[down_right] = std::min(moves[down], moves[right]);
+
+    for (size_t i = 0; i < count; i++) {
+        std::cout << "Grid: " << n << " Queen: [ " << queen.x << ", " << queen.y << " ]: (" << dir_to_name[(dir_t)i] << ") -> " << moves[i] << "\n";
+    }
+
+    std::unordered_set<long> processed;
+
+    for (std::vector<int>& pos : obstacles) {
+        ivec2 obstacle = { pos[0], pos[1] };
+
+        long idx = obstacle.y * n + obstacle.x;
+        if (processed.count(idx)) { continue; }
+        else { processed.insert(idx); }
+
+        ivec2 diff = { obstacle.x - queen.x, obstacle.y - queen.y };
+        dir_t dir = get_dir(diff);
+
+        std::cout << "Got diff: [ " << diff.x << ", " << diff.y << " ] (" << dir_to_name[dir] << ") dist: " << ivec2_dist(diff) << "\n";
+
+        if (dir == count) { continue; }
+        moves[dir] = std::min(moves[dir], ivec2_dist(diff) - 1);
+    }
+
+    int sum = 0;
+    for (size_t i = 0; i < dir_t::count; i++) {
+        sum += moves[i];
+    }
+    return sum;
 }
 
 struct queen_attacks_test_t {
@@ -201,7 +290,7 @@ void test_queen_attacks() {
             .expected = 9
         },
         queen_attacks_test_t { 
-            .pos = {4,3},
+            .pos = {3, 4},
             .grid_size = 5,
             .obstacles = {
                 {5,5},
@@ -227,5 +316,5 @@ void test_queen_attacks() {
 }
 
 int main(void) {
-    test_grid_search();
+    test_queen_attacks();
 }
