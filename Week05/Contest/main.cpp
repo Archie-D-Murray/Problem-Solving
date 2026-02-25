@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream>
 #include <ostream>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -153,6 +154,104 @@ void test_parent() {
     }
 }
 
+std::string is_heap(std::vector<int>& arr) {
+    if (arr.size() < 2) { return "Neither"; }
+    bool max = arr[0] > arr[1];
+    for (size_t i = 0; 2 * i + 2 < arr.size(); i++) {
+        if (max) {
+            if (arr[i] < arr[2 * i + 1] || arr[i] < arr[2 * i + 2]) {
+                return "Neither";
+            }
+        } else {
+            if (arr[i] > arr[2 * i + 1] || arr[i] > arr[2 * i + 2]) {
+                return "Neither";
+            }
+        }
+    }
+
+    return max ? "Max" : "Min";
+}
+
+struct heap_test_t {
+    std::vector<int> arr;
+    std::string expected;
+};
+
+void test_heap() {
+    std::vector<heap_test_t> tests = {
+        heap_test_t {
+            .arr = { 98215, 71775, 95635, 37514, 65570, 77259, 87886, 7848 },
+            .expected = "Max"
+        },
+        heap_test_t {
+            .arr = {165, 1217, 23582, 7907, 7039, 45039, 86416, 78843, 67420, 93903, 85839, 86473},
+            .expected = "Min"
+        },
+        heap_test_t {
+            .arr = {32319, 61352, 18302, 91880, 25160, 53643, 45346, 2434, 11738, 51769, 44052, 8368, 55129, 35148, 18811, 97159, 88247, 55284, 39313, 32498},
+            .expected = "Neither"
+        },
+    };
+
+    for (heap_test_t& test : tests) {
+        std::string output = is_heap(test.arr);
+        std::cout << "Expected: " << test.expected << "\n";
+        std::cout << "Found:    " << output << "\n";
+        std::cout << "Match:    " << (test.expected == output ? "TRUE" : "FALSE") << "\n";
+        std::cout << "\n";
+    }
+}
+
+int max_even(BinarySearchTreeNode* tree) {
+    if (!tree || tree->data & 1) { return 0; }
+
+    int left = max_even(tree->left);
+    int right = max_even(tree->right);
+
+    return tree->data + std::max(left, right);
+}
+
+struct max_test_t {
+    std::vector<int> arr;
+    int expected;
+};
+
+void test_max_even() {
+    std::vector<max_test_t> tests = {
+        max_test_t { 
+            .arr = { 63144, 77162, 84092, 44215, 52331 },
+            .expected = 224398
+        },
+        max_test_t { 
+            .arr = { 47446, 82216, 96928, 98437, 98620, 84882, 94903, 60156, 74960, 75661, 57106, 22064, 35952, 43027, 44197, 31382, 12075, 12551, 15088, 2121 },
+            .expected = 311472
+        },
+        max_test_t { 
+            .arr = { 6352, 26718, 73638, 41108, 73455, 56991, 69122, 5562, 69939, 27471, 83575, 45955, 13487, 16578, 22833, 17598, 93689, 22930, 39993, 9266 },
+            .expected = 147816
+        },
+        max_test_t { 
+            .arr = { 18336, 51277, 24496, 23147, 21577, 49085, 12328, 60708, 2185, 43028, 50540, 28232, 556, 68448, 53789, 28097, 9308, 43161, 20585, 53078 },
+            .expected = 30664
+        },
+    };
+
+    for (max_test_t& test : tests) {
+
+        BinarySearchTreeNode* root = nullptr;
+
+        for (int value : test.arr) {
+            root = insert_node_into_binary_search_tree(root, value);
+        }
+
+        int output = max_even(root);
+        std::cout << "Expected: " << test.expected << "\n";
+        std::cout << "Found:    " << output << "\n";
+        std::cout << "Match:    " << (test.expected == output ? "TRUE" : "FALSE") << "\n";
+        std::cout << "\n";
+    }
+}
+
 int main(void) {
-    test_parent();
+    test_max_even();
 }
