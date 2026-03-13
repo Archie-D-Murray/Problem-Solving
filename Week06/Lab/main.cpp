@@ -69,37 +69,7 @@ int perimeter_value(std::vector<std::vector<int>>& grid, ivec2 pos) {
     return sum;
 }
 
-struct bracket_t {
-    char closing;
-    bool opening;
-};
-
-bracket_t brackets[128] = { 0 };
-std::stack<char> stack;
-
-bool process(char ch) {
-    if (brackets[ch].opening) {
-        char popped = stack.top();
-        if (popped != brackets[ch].closing) {
-            return false;
-        } else {
-            stack.pop();
-        }
-    } else if (brackets[ch].closing) {
-        stack.push(ch);
-    }
-
-    return true;
-}
-
 int island_perimeter(std::vector<std::vector<int>>& grid) {
-    brackets['{'] = bracket_t {
-        .closing = '}',
-        .opening = true
-    };
-
-    char chs[] = { '[', ']', '{', '}', '(', ')' };
-
     std::queue<ivec2> queue;
     int perimeter_sum = 0;
 
