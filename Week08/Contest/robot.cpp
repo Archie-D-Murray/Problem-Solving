@@ -1,3 +1,4 @@
+#include <cassert>
 #include <cstdint>
 #include <functional>
 #include <iostream>
@@ -233,13 +234,14 @@ void test_robot_paths() {
     };
 
     for (robot_test_t& test : tests) {
-        std::cout << "\n---------------------------\n";
+        // std::cout << "\n---------------------------\n";
         int64_t output = robot_paths(test.nx, test.ny, test.k, test.obstacle_positions);
-
-        std::cout << "Output:   " << output << "\n";
-        std::cout << "Expected: " << test.expected << "\n";
-        std::cout << "Match:    " << bool_to_str(output == test.expected) << "\n";
-        std::cout << "---------------------------\n";
+        assert(output == test.expected);
+        //
+        // std::cout << "Output:   " << output << "\n";
+        // std::cout << "Expected: " << test.expected << "\n";
+        // std::cout << "Match:    " << bool_to_str(output == test.expected) << "\n";
+        // std::cout << "---------------------------\n";
     }
 }
 

@@ -1,6 +1,24 @@
+#include <cstddef>
 #include <iostream>
 #include <string>
+#include <unordered_map>
 #include <vector>
+
+struct ivec2 {
+    int x;
+    int y;
+
+};
+
+bool operator==(const ivec2& s, const ivec2& o) {
+    return (s.x == o.x) && (s.y == o.y);
+}
+
+template<> struct std::hash<ivec2> {
+    std::size_t operator() (const ivec2& vec) const noexcept {
+        return std::hash<int>{}(vec.x) ^ (std::hash<int>{}(vec.y) << 1);
+    }
+};
 
 const char* bool_to_str(bool value) {
     return value ? "True" : "False";
@@ -24,7 +42,23 @@ template<typename T> void print_vector(std::vector<T> vector, bool new_line = tr
 }
 
 std::vector<std::vector<int>> pascal_triangle(int rows) {
-    return {};
+    std::vector<std::vector<int>> triangle = std::vector<std::vector<int>>(0);
+    for (int i = 0; i < rows; i++) {
+        triangle.push_back(std::vector<int>(0));
+        triangle.back().reserve(i + 1);
+    }
+
+    for (int i = 1; i < rows; i++) {
+        for (int c = 0; c <= i; c++) {
+            if (c == 0 || c == i) {
+                triangle[i].push_back(1);
+            } else {
+                triangle[i].push_back(triangle[i - 1][c - 1] + triangle[i - 1][c]);
+            }
+        }
+    }
+
+    return triangle;
 }
 
 struct pascal_test_t {
@@ -85,8 +119,37 @@ void test_pascal_triangle(void) {
     }
 }
 
+static std::string chars[8] = {
+    "abc",
+    "def",
+    "ghi",
+    "jkl",
+    "mno",
+    "pqrs",
+    "tuv",
+    "wxyz",
+};
+
+void letter_driver(std::vector<std::string>& combinations, std::string& digits, size_t index, std::string& current) {
+    if (index == digits.size()) {
+        combinations.push_back(current);
+        return;
+    }
+
+    for (char ch : chars[digits[index] - '2']) {
+        current.push_back(ch);
+        letter_driver(combinations, digits, index + 1, current);
+        current.pop_back();
+    }
+}
+
 std::vector<std::string> letter_combos(std::string& digits) {
-    return {};
+    std::vector<std::string> combos;
+
+    std::string current = "";
+    letter_driver(combos, digits, 0, current);
+
+    return combos;
 }
 
 struct letter_combo_test_t {
@@ -119,8 +182,31 @@ void test_letter_combo(void) {
     }
 }
 
+int decode_driver(std::string& s, size_t i, std::vector<int>& memo) {
+    if (memo[i] > -1) {
+        return memo[i];
+    }
+
+    if (s[i] == '0') {
+        memo[i] = 0;
+        return 0;
+    }
+
+    int result = decode_driver(s, i + 1, memo); // No pair value
+
+    if (i < s.size() - 1 && (s[i] == '1' || s[i] == '2' && s[i + 1] < '7')) {
+        result += decode_driver(s, i + 2, memo);
+    }
+    memo[i] = result;
+    return result;
+}
+
 int num_decodings(std::string& s) {
-    return {};
+    int ways = 1;
+    std::vector<int> memo = std::vector<int>(s.size() + 1, -1);
+
+    memo[s.size()] = 1;
+    return s.size() ? decode_driver(s, 0, memo) : 0;
 }
 
 struct num_decodings_test_t {
@@ -189,5 +275,6 @@ void test_coin_change(void) {
 }
 
 int main(void) {
-
+    test_num_decodings();
+    
 }
