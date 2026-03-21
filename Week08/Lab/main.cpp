@@ -1,4 +1,5 @@
 #include <cstddef>
+#include <cstdint>
 #include <iostream>
 #include <string>
 #include <unordered_map>
@@ -237,14 +238,24 @@ void test_num_decodings(void) {
     }
 }
 
-int coin_change(int n, std::vector<int>& c) {
-    return {};
+int64_t coin_change(int n, std::vector<int>& c) {
+    std::vector<int64_t> prev = std::vector<int64_t>(n + 1, 0);
+    prev[0] = 1;
+
+    for (size_t i = 0; i < c.size(); i++) {
+        int coin = c[i];
+        for (int64_t denomination = coin; denomination <= n; denomination++) {
+            prev[denomination] += prev[denomination - coin];
+        }
+    }
+
+    return prev[n];
 }
 
 struct coin_change_test_t {
     int amount;
     std::vector<int> denominations;
-    int expected;
+    int64_t expected;
 };
 
 void test_coin_change(void) {
@@ -275,6 +286,5 @@ void test_coin_change(void) {
 }
 
 int main(void) {
-    test_num_decodings();
-    
+    test_coin_change();
 }
