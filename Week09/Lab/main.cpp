@@ -255,51 +255,6 @@ std::vector<int> top_k_freq(std::vector<int>& nums, int k) {
     return top_k;
 }
 
-std::vector<int> top_k_freq(std::vector<int>& nums, int k) {
-    std::unordered_map<int, int> mapped;
-    for (int value : nums) {
-        mapped[value]++;
-    }
-    std::vector<num_freq_t> sorted = std::vector<num_freq_t>(0);
-    sorted.reserve(mapped.size());
-
-    for (const std::pair<int, int>& pair : mapped) {
-        sorted.push_back(num_freq_t { pair.first, pair.second });
-    }
-
-    std::stable_sort(sorted.begin(), sorted.end(), compare_num_freq_t {});
-
-    std::vector<int> top_k = std::vector<int>(k);
-
-    for (int i = 0; i < k; i++) {
-        top_k[i] = sorted[i].num;
-    }
-
-    return top_k;
-}
-std::vector<int> top_k_freq(std::vector<int>& nums, int k) {
-    std::unordered_map<int, int> mapped;
-    for (int value : nums) {
-        mapped[value]++;
-    }
-    std::vector<num_freq_t> sorted = std::vector<num_freq_t>(0);
-    sorted.reserve(mapped.size());
-
-    for (const std::pair<int, int>& pair : mapped) {
-        sorted.push_back(num_freq_t { pair.first, pair.second });
-    }
-
-    std::stable_sort(sorted.begin(), sorted.end(), compare_num_freq_t {});
-
-    std::vector<int> top_k = std::vector<int>(k);
-
-    for (int i = 0; i < k; i++) {
-        top_k[i] = sorted[i].num;
-    }
-
-    return top_k;
-}
-
 struct top_k_freq_test_t {
     int k;
     std::vector<int> nums;

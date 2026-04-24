@@ -45,8 +45,8 @@ int count_chars(std::string str) {
         }
     }
 
+    int result;
     for (char c : str) {
-        if ()
     }
 
     return result;
