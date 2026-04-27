@@ -4,7 +4,6 @@
 #include <vector>
 #include <string>
 
-// WARN: Does not work!
 // #define FUNCTION_PTR_LOOKUP
 
 #ifdef FUNCTION_PTR_LOOKUP
@@ -26,15 +25,17 @@ void left(size_t* index, size_t width) {
 }
 
 
-typedef void (*move_t(size_t*, size_t));
+typedef void (move_t(size_t*, size_t));
+
+move_t* moves_fast[128] = {0};
 
 // Leaving blank and initialising using emplace or just moves['^'] = &up; does not work either
-std::unordered_map<char, move_t> moves = {
-    { '^', &up },
-    { 'v', &down },
-    { '>', &right },
-    { '<', &left },
-};
+// std::unordered_map<char, move_t*> moves = {
+//     { '^', &up },
+//     { 'v', &down },
+//     { '>', &right },
+//     { '<', &left },
+// };
 
 #endif
 
@@ -55,8 +56,8 @@ int32_t grid_index(int32_t nArray, int32_t nSteps, std::vector<std::string>& gri
 
         #ifdef FUNCTION_PTR_LOOKUP
 
-        moves[grid[index / nArray][index % nArray]](&index, nArray);
-        
+        moves_fast[grid[index / nArray][index % nArray]](&index, nArray);
+
         #else
 
         char ch = grid[index / nArray][index % nArray];
@@ -85,6 +86,12 @@ int32_t grid_index(int32_t nArray, int32_t nSteps, std::vector<std::string>& gri
 }
 
 int main(void) {
+
+    moves_fast['^'] = &up;
+    moves_fast['v'] = &down;
+    moves_fast['>'] = &right;
+    moves_fast['<'] = &left;
+
     int32_t width = 16;
     int32_t steps = 8217;
     std::vector<std::string> grid = {
