@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-#define FUNCTION_PTR_LOOKUP
+// #define FUNCTION_PTR_LOOKUP
 
 #ifdef FUNCTION_PTR_LOOKUP
 
@@ -26,7 +26,7 @@ void left(size_t* index, size_t width) {
 
 typedef void (move_t(size_t*, size_t));
 
-uint64_t moves[4] = { (uint64_t) &up, (uint64_t) &down, (uint64_t) &right, (uint64_t) &left };
+move_t* moves[128] = { 0 };
 
 // Leaving blank and initialising using emplace or just moves['^'] = &up; does not work either
 size_t move_lookups[128] = {0};
@@ -34,7 +34,9 @@ size_t move_lookups[128] = {0};
 #endif
 
 int32_t grid_index(int32_t nArray, int32_t nSteps, std::vector<std::string>& grid) {
+    // Start index is always 0
     size_t index = 0;
+    // Map to store all visited grid indexes mapping to when they were visited
     std::unordered_map<size_t, size_t> loops;
 
     for (size_t i = 0; i < nSteps; i++) {
@@ -43,6 +45,8 @@ int32_t grid_index(int32_t nArray, int32_t nSteps, std::vector<std::string>& gri
         if (!loops.count(index)) {
             loops[index] = i;
         } else {
+            // Loop detected, skip to the last iteration of loop and continue from there
+            // Must clear map so that this does not infinitely loop
             nSteps = nSteps % (i - loops[index]);
             loops.clear();
             i = 0;
@@ -50,8 +54,8 @@ int32_t grid_index(int32_t nArray, int32_t nSteps, std::vector<std::string>& gri
 
         #ifdef FUNCTION_PTR_LOOKUP
 
-        ((move_t*)(moves[move_lookups[grid[index / nArray][index % nArray]]]))(&index, nArray);
-        
+        moves[grid[index / nArray][index % nArray]](&index, nArray);
+
         #else
 
         char ch = grid[index / nArray][index % nArray];
@@ -80,11 +84,14 @@ int32_t grid_index(int32_t nArray, int32_t nSteps, std::vector<std::string>& gri
 }
 
 int main(void) {
+    #ifdef FUNCTION_PTR_LOOKUP
 
-    move_lookups['^'] = 0;
-    move_lookups['v'] = 1;
-    move_lookups['>'] = 2;
-    move_lookups['<'] = 3;
+    moves['^'] = &up;
+    moves['v'] = &down;
+    moves['>'] = &right;
+    moves['<'] = &left;
+
+    #endif
 
     int32_t width = 16;
     int32_t steps = 8217;
@@ -107,5 +114,10 @@ int main(void) {
         "^<<<^<<<^<^<<<<<",
     };
 
+    std::cout << "Width: " << width << ", Steps: " << steps << "\n";
+    std::cout << "Grid:\n";
+    for (const std::string& line : grid) {
+        std::cout << line << "\n";
+    }
     std::cout << "Expected: 9 -> Got: " << grid_index(width, steps, grid) << "\n";
 }
