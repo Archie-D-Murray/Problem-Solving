@@ -23,6 +23,7 @@ int main(int argc, char* argv[]) {
     nob_da_append(&flags, "-g");
     nob_da_append(&flags, "-O0");
     nob_da_append(&flags, "-fstandalone-debug");
+    nob_da_append(&flags, "-fsanitize=address");
 
     const char* exe = is_windows ? "main.exe" : "./main";
 
