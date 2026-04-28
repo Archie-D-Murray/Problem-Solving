@@ -1,9 +1,9 @@
 #include <cassert>
 #include <cctype>
+#include <cstdint>
 #include <cstdio>
 #include <cstring>
 #include <iostream>
-#include <stack>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -61,7 +61,7 @@ int speed_camera(std::vector<std::string>& data) {
 
     int hour, min, sec;
     for (std::string& entry : data) {
-        sscanf(entry.data() + 8, "%d %d %d", &hour, &min, &sec);
+        sscanf_s(entry.data() + 8, "%d %d %d", &hour, &min, &sec);
         float time = hour + (min / 60.0f) + (sec / 3600.0f);
         std::string reg = entry.substr(0, 7);
 
@@ -109,6 +109,52 @@ void test_speed_camera() {
         std::cout << "Match:    " << (output == test.expected ? "True" : "False") << "\n";
         std::cout << "-----------------------------------------\n";
     }
+}
+
+std::string valid_sudoku_bits(std::string& s) {
+    int16_t valid = 0;
+
+    const size_t offset = '1';
+
+    for (size_t i = 0; i < 9; i++) {
+
+        for (size_t x = 0; x < 9; x++) {
+            if (valid & (1 << (s[i * 9 + x] - offset))) {
+                return "INVALID";
+            } else {
+                valid |= 1 << (s[i * 9 + x] - offset);
+            }
+        }
+
+        valid = 0;
+
+        for (size_t y = 0; y < 9; y++) {
+            if (valid & (1 << (s[y * 9 + i] - offset))) {
+                return "INVALID";
+            } else {
+                valid |= 1 << (s[y * 9 + i] - offset);
+            }
+        }
+
+        valid = 0;
+
+
+        for (size_t y = 0; y < 3; y++) {
+            size_t start_y = (i / 3) * 27;
+            for (size_t x = 0; x < 3; x++) {
+                size_t index = start_y + (y * 9) + (i % 3) * 3 + x;
+                if (valid & (1 << (s[index] - offset))) {
+                    return "INVALID";
+                } else {
+                    valid |= 1 << (s[index] - offset);
+                }
+            }
+        }
+
+        valid = 0;
+    }
+
+    return "VALID";
 }
 
 std::string valid_sudoku(std::string& s) {
@@ -180,7 +226,7 @@ void test_sudoku() {
 
     for (sudoku_test_t& test : tests) {
         std::cout << "\n-----------------------------------------\n";
-        std::string output = valid_sudoku(test.grid);
+        std::string output = valid_sudoku_bits(test.grid);
         std::cout << "Output:   " << output << "\n";
         std::cout << "Expected: " << test.expected << "\n";
         std::cout << "Match:    " << (output == test.expected ? "True" : "False") << "\n";

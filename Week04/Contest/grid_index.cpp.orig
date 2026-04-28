@@ -4,7 +4,11 @@
 #include <vector>
 #include <string>
 
+<<<<<<< HEAD
 #define FUNCTION_PTR_LOOKUP
+=======
+// #define FUNCTION_PTR_LOOKUP
+>>>>>>> 2b7bd3c06c46e21bfdd119ac2066443fc910dc4b
 
 #ifdef FUNCTION_PTR_LOOKUP
 
@@ -26,6 +30,14 @@ void left(size_t* index, size_t width) {
 
 typedef void (move_t(size_t*, size_t));
 
+<<<<<<< HEAD
+uint64_t moves[4] = { (uint64_t) &up, (uint64_t) &down, (uint64_t) &right, (uint64_t) &left };
+
+// Leaving blank and initialising using emplace or just moves['^'] = &up; does not work either
+size_t move_lookups[128] = {0};
+=======
+typedef void (move_t(size_t*, size_t));
+
 move_t* moves_fast[128] = {0};
 
 // Leaving blank and initialising using emplace or just moves['^'] = &up; does not work either
@@ -35,6 +47,7 @@ move_t* moves_fast[128] = {0};
 //     { '>', &right },
 //     { '<', &left },
 // };
+>>>>>>> 2b7bd3c06c46e21bfdd119ac2066443fc910dc4b
 
 #endif
 
@@ -55,8 +68,13 @@ int32_t grid_index(int32_t nArray, int32_t nSteps, std::vector<std::string>& gri
 
         #ifdef FUNCTION_PTR_LOOKUP
 
+<<<<<<< HEAD
+        ((move_t*)(moves[move_lookups[grid[index / nArray][index % nArray]]]))(&index, nArray);
+        
+=======
         moves_fast[grid[index / nArray][index % nArray]](&index, nArray);
 
+>>>>>>> 2b7bd3c06c46e21bfdd119ac2066443fc910dc4b
         #else
 
         char ch = grid[index / nArray][index % nArray];
@@ -86,10 +104,17 @@ int32_t grid_index(int32_t nArray, int32_t nSteps, std::vector<std::string>& gri
 
 int main(void) {
 
+<<<<<<< HEAD
+    move_lookups['^'] = 0;
+    move_lookups['v'] = 1;
+    move_lookups['>'] = 2;
+    move_lookups['<'] = 3;
+=======
     moves_fast['^'] = &up;
     moves_fast['v'] = &down;
     moves_fast['>'] = &right;
     moves_fast['<'] = &left;
+>>>>>>> 2b7bd3c06c46e21bfdd119ac2066443fc910dc4b
 
     int32_t width = 16;
     int32_t steps = 8217;

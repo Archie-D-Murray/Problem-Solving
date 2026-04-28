@@ -114,15 +114,25 @@ std::string playfair_code(std::string plainText, std::string codePhrase) {
         }
     }
 
-    //  TODO:
-    // encoded.reserve(pairs.size() * 2);
+    // NOTE: Not in submitted version
+
+    encoded.reserve(pairs.size() * 2);
 
     for (std::pair<char, char>& pair : pairs) {
         std::cout << "Got pair: " << pair.first << pair.second << " -> ";
 
         if (correct_rect(pair, cols, rows, grid)) {
+            std::cout << pair.first << pair.second;
+            std::cout << " (Corrected rect)\n";
         } else if (correct_rows(pair, cols, rows, grid)) {
-        } else if (correct_cols(pair, cols, rows, grid)) { }
+            std::cout << pair.first << pair.second;
+            std::cout << " (Corrected rows)\n";
+        } else if (correct_cols(pair, cols, rows, grid)) {
+            std::cout << pair.first << pair.second;
+            std::cout << " (Corrected cols)\n";
+        } else {
+            std::cout << pair.first << pair.second << "\n";
+        }
 
 
         encoded.push_back(pair.first);
